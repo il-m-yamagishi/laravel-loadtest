@@ -1,4 +1,4 @@
-version: "2"
+version: '2'
 
 volumes:
   prometheus_data: {}
@@ -21,11 +21,19 @@ services:
     expose:
       - 9100
 
+  apache-prefork-exporter:
+    image: lusotycoon/apache-exporter:v0.11.0
+    container_name: apache-prefork-exporter
+    command:
+      - --scrape_uri=http://prefork/server-status/?auto
+    expose:
+      - 9117
+
   mysql-exporter:
     image: prom/mysqld-exporter:v0.13.0
     container_name: mysql-exporter
     environment:
-      DATA_SOURCE_NAME: "exporter:secret@(mysql:3306)/database"
+      DATA_SOURCE_NAME: 'exporter:secret@(mysql:3306)/database'
     expose:
       - 9104
     depends_on:
@@ -34,7 +42,7 @@ services:
   prometheus:
     image: prom/prometheus:v2.32.1
     ports:
-      - "9090:9090"
+      - '9090:9090'
     volumes:
       - prometheus_data:/prometheus
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -48,6 +56,7 @@ services:
       TZ: ${TZ-Asia/Tokyo}
     depends_on:
       - node-exporter
+      - apache-prefork-exporter
       - mysql-exporter
 
   prefork:
@@ -55,7 +64,7 @@ services:
       context: laravel
       dockerfile: ../docker/prefork/Dockerfile
     ports:
-      - "8080:80"
+      - '8080:80'
     volumes:
       - ${APP_PATH-./laravel}:/var/www/laravel-load:cached
     environment:
@@ -63,10 +72,10 @@ services:
       APP_NAME: LaravelPrefork
       APP_ENV: production
       APP_KEY: base64:eP74rAUl4xlTfWPRMAPkWervWN3ZzH8B353vXXZlJlk=
-      APP_DEBUG: "false"
-      DB_DATABASE: 'laravel_prefork'
-      DB_USERNAME: 'laravel-writer'
-      DB_PASSWORD: 'laravel-writer'
+      APP_DEBUG: 'false'
+      DB_DATABASE: laravel_prefork
+      DB_USERNAME: laravel-writer
+      DB_PASSWORD: laravel-writer
     depends_on:
       - mysql
       - redis
@@ -76,7 +85,7 @@ services:
   mysql:
     image: mysql:8.0.28
     ports:
-      - "3306"
+      - 3306
     volumes:
       - ${APP_PATH-.}/docker/mysql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     environment:
@@ -87,6 +96,6 @@ services:
   redis:
     image: redis:6.0.16-alpine
     ports:
-      - "6379"
+      - 6379
     environment:
       TZ: ${TZ-Asia/Tokyo}
