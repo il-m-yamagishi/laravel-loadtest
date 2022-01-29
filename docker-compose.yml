@@ -1,0 +1,92 @@
+version: "2"
+
+volumes:
+  prometheus_data: {}
+
+services:
+  # @link https://grafana.com/docs/grafana-cloud/quickstart/docker-compose-linux/
+  node-exporter:
+    image: prom/node-exporter:v1.3.1
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+
+  mysql-exporter:
+    image: prom/mysqld-exporter:v0.13.0
+    container_name: mysql-exporter
+    environment:
+      DATA_SOURCE_NAME: "exporter:secret@(mysql:3306)/database"
+    expose:
+      - 9104
+    depends_on:
+      - mysql
+
+  prometheus:
+    image: prom/prometheus:v2.32.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    environment:
+      TZ: ${TZ-Asia/Tokyo}
+    depends_on:
+      - node-exporter
+      - mysql-exporter
+
+  prefork:
+    build:
+      context: laravel
+      dockerfile: ../docker/prefork/Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ${APP_PATH-./laravel}:/var/www/laravel-load:cached
+    environment:
+      TZ: ${TZ-Asia/Tokyo}
+      APP_NAME: LaravelPrefork
+      APP_ENV: production
+      APP_KEY: base64:eP74rAUl4xlTfWPRMAPkWervWN3ZzH8B353vXXZlJlk=
+      APP_DEBUG: "false"
+      DB_DATABASE: 'laravel_prefork'
+      DB_USERNAME: 'laravel-writer'
+      DB_PASSWORD: 'laravel-writer'
+    depends_on:
+      - mysql
+      - redis
+    mem_limit: 1024m
+    cpus: 1.0
+
+  mysql:
+    image: mysql:8.0.28
+    ports:
+      - "3306"
+    volumes:
+      - ${APP_PATH-.}/docker/mysql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      TZ: ${TZ-Asia/Tokyo}
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --default-time-zone=Asia/Tokyo
+
+  redis:
+    image: redis:6.0.16-alpine
+    ports:
+      - "6379"
+    environment:
+      TZ: ${TZ-Asia/Tokyo}
