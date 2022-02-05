@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1
 
-ARG COMPOSER_VERSION=2.2.5
 ARG PHP_VERSION=8.0.15-apache-bullseye
 ARG PHP_EXT_INSTALLER_VERSION=1.4.13
 
@@ -8,6 +7,7 @@ FROM mlocati/php-extension-installer:${PHP_EXT_INSTALLER_VERSION} AS ext_install
 
 FROM php:${PHP_VERSION}
 
+ARG COMPOSER_VERSION=2.2.5
 ENV DEBIAN_FRONTEND noninteractive
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8

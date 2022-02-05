@@ -3,6 +3,7 @@ version: '2'
 volumes:
   prometheus_data: {}
   grafana_data: {}
+  mysql_data: {}
 
 services:
 
@@ -33,11 +34,11 @@ services:
     expose:
       - 9117
 
-  mysql-exporter:
+  mysql-prefork-exporter:
     image: prom/mysqld-exporter:v0.13.0
-    container_name: mysql-exporter
+    container_name: mysql-prefork-exporter
     environment:
-      DATA_SOURCE_NAME: 'exporter:secret@(mysql:3306)/database'
+      DATA_SOURCE_NAME: 'exporter:secret@(mysql:3306)/laravel_prefork'
     expose:
       - 9104
     depends_on:
@@ -61,7 +62,7 @@ services:
     depends_on:
       - node-exporter
       - apache-prefork-exporter
-      - mysql-exporter
+      - mysql-prefork-exporter
 
   grafana:
     image: grafana/grafana:8.3.4
@@ -69,6 +70,26 @@ services:
       - '3000:3000'
     volumes:
       - grafana_data:/var/lib/grafana
+
+# locust
+
+  locust:
+    image: locustio/locust:2.7.2
+    ports:
+      - '8089:8089'
+    expose:
+      - 5557
+    volumes:
+      - ./locust:/mnt/locust:ro
+    command: -f /mnt/locust/locustfile.py --master
+    depends_on:
+      - locust-worker
+
+  locust-worker:
+    image: locustio/locust:2.7.2
+    volumes:
+      - ./locust:/mnt/locust:ro
+    command: -f /mnt/locust/locustfile.py --worker --master-host=locust --master-port=5557
 
 # app runtime
 
@@ -86,6 +107,8 @@ services:
       APP_ENV: production
       APP_KEY: base64:eP74rAUl4xlTfWPRMAPkWervWN3ZzH8B353vXXZlJlk=
       APP_DEBUG: 'false'
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
       DB_DATABASE: laravel_prefork
       DB_USERNAME: laravel-writer
       DB_PASSWORD: laravel-writer
@@ -95,12 +118,15 @@ services:
     mem_limit: 1024m
     cpus: 1.0
 
+# app backend
+
   mysql:
     image: mysql:8.0.28
     ports:
       - 3306
     volumes:
       - ${APP_PATH-.}/docker/mysql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+      - mysql_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: secret
       TZ: ${TZ-Asia/Tokyo}
