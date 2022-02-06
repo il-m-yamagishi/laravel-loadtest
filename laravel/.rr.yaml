@@ -3,8 +3,6 @@ server:
   command: "php vendor/bin/roadrunner-worker"
   user: "www-data"
   group: "www-data"
-  env:
-    - ADMIN_MODE: ${ADMIN_MODE}
 http:
   address: ":8000"
   max_request_size: 64
