@@ -11,14 +11,6 @@ scrape_configs:
     static_configs:
       - targets:
         - 'node-exporter:9100'
-  - job_name: 'mysql-exporter'
-    static_configs:
-      - targets:
-        - 'mysql-prefork-exporter:9104'
-  - job_name: 'apache-prefork-exporter'
-    static_configs:
-      - targets:
-        - 'apache-prefork-exporter:9117'
   - job_name: 'docker'
     static_configs:
       - targets:

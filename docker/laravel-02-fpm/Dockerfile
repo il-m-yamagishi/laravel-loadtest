@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG PHP_VERSION=8.0.15-apache-bullseye
+ARG PHP_VERSION=8.0.14-fpm-bullseye
 ARG PHP_EXT_INSTALLER_VERSION=1.4.13
 
 FROM mlocati/php-extension-installer:${PHP_EXT_INSTALLER_VERSION} AS ext_installer
@@ -16,16 +16,12 @@ ENV TZ ${TZ}
 
 COPY --from=ext_installer /usr/bin/install-php-extensions /usr/bin/install-php-extensions
 
-RUN install-php-extensions @composer-${COMPOSER_VERSION} gettext opcache pdo_mysql redis zip
+RUN install-php-extensions @composer-${COMPOSER_VERSION} gettext opcache pdo_mysql redis zip sockets
 
 COPY php.ini /usr/local/etc/php/php.ini
-COPY 001-app.conf /etc/apache2/sites-available/001-app.conf
 
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
     && echo ${TZ} > /etc/timezone \
-    && a2enmod rewrite \
-    && a2dissite 000-default \
-    && a2ensite 001-app \
     && mkdir -p /var/www/laravel-load \
     && chown www-data:www-data /var/www/laravel-load
 
@@ -42,6 +38,5 @@ RUN composer install --no-dev --no-interaction --no-progress \
     && php artisan config:cache --no-ansi -n \
     && php artisan route:cache --no-ansi -n
 
-EXPOSE 80
-HEALTHCHECK CMD curl -f http://127.0.0.1/api
+EXPOSE 9000
 USER root

@@ -1,0 +1,17 @@
+version: "2.7"
+server:
+  command: "php vendor/bin/roadrunner-worker"
+  user: "www-data"
+  group: "www-data"
+  env:
+    - ADMIN_MODE: ${ADMIN_MODE}
+http:
+  address: ":8000"
+  max_request_size: 64
+
+  pool:
+    supervisor:
+      max_worker_memory: 128
+
+status:
+  address: localhost:2114

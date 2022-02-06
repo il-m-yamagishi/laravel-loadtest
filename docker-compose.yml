@@ -10,6 +10,7 @@ services:
 # Prometheus + Grafana
 
   # @link https://grafana.com/docs/grafana-cloud/quickstart/docker-compose-linux/
+  # works on Linux(WSL2)
   node-exporter:
     image: prom/node-exporter:v1.3.1
     container_name: node-exporter
@@ -25,24 +26,6 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     expose:
       - 9100
-
-  apache-prefork-exporter:
-    image: lusotycoon/apache-exporter:v0.11.0
-    container_name: apache-prefork-exporter
-    command:
-      - --scrape_uri=http://prefork/server-status/?auto
-    expose:
-      - 9117
-
-  mysql-prefork-exporter:
-    image: prom/mysqld-exporter:v0.13.0
-    container_name: mysql-prefork-exporter
-    environment:
-      DATA_SOURCE_NAME: 'exporter:secret@(mysql:3306)/laravel_prefork'
-    expose:
-      - 9104
-    depends_on:
-      - mysql
 
   prometheus:
     image: prom/prometheus:v2.32.1
@@ -61,8 +44,6 @@ services:
       TZ: ${TZ-Asia/Tokyo}
     depends_on:
       - node-exporter
-      - apache-prefork-exporter
-      - mysql-prefork-exporter
 
   grafana:
     image: grafana/grafana:8.3.4
@@ -93,25 +74,72 @@ services:
 
 # app runtime
 
-  prefork:
+# Laravel 01 Apache
+
+  laravel-01-apache:
     build:
       context: laravel
-      dockerfile: ../docker/prefork/Dockerfile
+      dockerfile: ../docker/laravel-01-apache/Dockerfile
     ports:
       - '8080:80'
+    env_file:
+      - .env.laravel-01-apache
+    depends_on:
+      - mysql
+      - redis
+    mem_limit: 1024m
+    cpus: 1.0
+
+# Laravel 02 FPM
+
+  laravel-02-fpm:
+    build:
+      context: laravel
+      dockerfile: ../docker/laravel-02-fpm/Dockerfile
+    expose:
+      - 9000
+    env_file:
+      - .env.laravel-02-fpm
+    depends_on:
+      - mysql
+      - redis
+    mem_limit: 768m
+    cpus: 0.7
+
+  laravel-02-fpm-nginx:
+    image: nginx:1.20.2-alpine
     volumes:
-      - ${APP_PATH-./laravel}:/var/www/laravel-load:cached
-    environment:
-      TZ: ${TZ-Asia/Tokyo}
-      APP_NAME: LaravelPrefork
-      APP_ENV: production
-      APP_KEY: base64:eP74rAUl4xlTfWPRMAPkWervWN3ZzH8B353vXXZlJlk=
-      APP_DEBUG: 'false'
-      SESSION_DRIVER: redis
-      REDIS_HOST: redis
-      DB_DATABASE: laravel_prefork
-      DB_USERNAME: laravel-writer
-      DB_PASSWORD: laravel-writer
+      - laravel/laravel.nginx.conf:/etc/nginx/conf.d/laravel.conf:ro
+    ports:
+      - '8081:80'
+    mem_limit: 256m
+    cpus: 0.3
+    depends_on:
+      - laravel-02-fpm
+
+# Laravel 03 nginxunit
+
+  # @link https://unit.nginx.org/howto/laravel/
+  laravel-03-nginxunit:
+    build:
+      context: laravel
+      dockerfile: ../docker/laravel-03-nginxunit/Dockerfile
+    env_file:
+      - .env.laravel-03-nginxunit
+    depends_on:
+      - mysql
+      - redis
+    mem_limit: 1024m
+    cpus: 1.0
+
+# Laravel 04 RR
+
+  laravel-04-rr:
+    build:
+      context: laravel
+      dockerfile: ../docker/laravel-04-rr/Dockerfile
+    env_file:
+      - .env.laravel-04-rr
     depends_on:
       - mysql
       - redis
