@@ -8,12 +8,10 @@
 
 declare(strict_types=1);
 
-namespace Tests;
+namespace App\Actions\User;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use RuntimeException;
 
-abstract class TestCase extends BaseTestCase
+final class UserNotFoundException extends RuntimeException
 {
-    use CreatesApplication;
-    use CreatesUser;
 }

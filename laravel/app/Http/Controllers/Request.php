@@ -8,12 +8,14 @@
 
 declare(strict_types=1);
 
-namespace Tests;
+namespace App\Http\Controllers;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Foundation\Http\FormRequest;
 
-abstract class TestCase extends BaseTestCase
+class Request extends FormRequest
 {
-    use CreatesApplication;
-    use CreatesUser;
+    public function rules(): array
+    {
+        return [];
+    }
 }

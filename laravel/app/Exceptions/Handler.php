@@ -1,11 +1,19 @@
 <?php
 
+/**
+ * @author    Masaru Yamagishi <yamagishi.iloop@gmail.com>
+ * @copyright 2022 Masaru Yamagishi
+ * @license   Apache License 2.0
+ */
+
+declare(strict_types=1);
+
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
-class Handler extends ExceptionHandler
+final class Handler extends ExceptionHandler
 {
     /**
      * A list of the exception types that are not reported.
@@ -25,6 +33,7 @@ class Handler extends ExceptionHandler
         'current_password',
         'password',
         'password_confirmation',
+        'login_token',
     ];
 
     /**

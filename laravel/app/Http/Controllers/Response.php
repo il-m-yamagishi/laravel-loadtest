@@ -8,12 +8,10 @@
 
 declare(strict_types=1);
 
-namespace Tests;
+namespace App\Http\Controllers;
 
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use JsonSerializable;
 
-abstract class TestCase extends BaseTestCase
+abstract class Response implements JsonSerializable
 {
-    use CreatesApplication;
-    use CreatesUser;
 }

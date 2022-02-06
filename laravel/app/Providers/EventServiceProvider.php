@@ -1,11 +1,16 @@
 <?php
 
+/**
+ * @author    Masaru Yamagishi <yamagishi.iloop@gmail.com>
+ * @copyright 2022 Masaru Yamagishi
+ * @license   Apache License 2.0
+ */
+
+declare(strict_types=1);
+
 namespace App\Providers;
 
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {

@@ -1,9 +1,20 @@
 <?php
 
+/**
+ * @author    Masaru Yamagishi <yamagishi.iloop@gmail.com>
+ * @copyright 2022 Masaru Yamagishi
+ * @license   Apache License 2.0
+ */
+
+declare(strict_types=1);
+
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -25,6 +36,16 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        Auth::viaRequest(
+            'custom-token',
+            function (Request $request): Authenticatable {
+                $token = $request->bearerToken();
+                if (!$token) {
+                    return null;
+                }
+
+                return User::where('login_token', $token)->first();
+            },
+        );
     }
 }
