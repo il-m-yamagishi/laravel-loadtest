@@ -1,0 +1,13 @@
+Method ,Name      ,Error                                                                                      ,Occurrences
+GET    ,/user     ,"ConnectionResetError(104, 'Connection reset by peer')"                                    ,24
+POST   ,/login    ,"ConnectionResetError(104, 'Connection reset by peer')"                                    ,18
+POST   ,/register ,CatchResponseError('Invalid code: 0')                                                      ,4205
+GET    ,/         ,RemoteDisconnected('Remote end closed connection without response')                        ,3755
+POST   ,/login    ,RemoteDisconnected('Remote end closed connection without response')                        ,323
+POST   ,/login    ,HTTPError('504 Server Error: Gateway Time-out for url: http://laravel-02-fpm-nginx/login') ,1
+GET    ,/         ,HTTPError('502 Server Error: Bad Gateway for url: http://laravel-02-fpm-nginx/')           ,2
+GET    ,/user     ,HTTPError('504 Server Error: Gateway Time-out for url: http://laravel-02-fpm-nginx/user')  ,3
+GET    ,/         ,HTTPError('504 Server Error: Gateway Time-out for url: http://laravel-02-fpm-nginx/')      ,7
+GET    ,/         ,"ConnectionResetError(104, 'Connection reset by peer')"                                    ,598
+POST   ,/register ,CatchResponseError('Invalid code: 504')                                                    ,3
+GET    ,/user     ,RemoteDisconnected('Remote end closed connection without response')                        ,493
