@@ -15,7 +15,7 @@ ENV TZ ${TZ}
 
 COPY --from=ext_installer /usr/bin/install-php-extensions /usr/bin/install-php-extensions
 
-RUN install-php-extensions @composer-${COMPOSER_VERSION} gettext opcache pdo_mysql redis zip sockets
+RUN install-php-extensions @composer-${COMPOSER_VERSION} gettext opcache pdo_mysql pcntl redis zip sockets
 
 COPY php.ini /usr/local/etc/php/php.ini
 COPY laravel.nginxunit.json /docker-entrypoint.d/config.json
@@ -28,16 +28,15 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
 
 
 WORKDIR /var/www/laravel-load
-USER unit:unit
+USER unit
 
 COPY --chown=unit:unit . /var/www/laravel-load/
 
 RUN composer install --no-dev --no-interaction --no-progress \
     && find ./storage -type d | xargs chmod 777 \
-    && chmod 777 ./bootstrap/cache \
-    && php artisan config:cache --no-ansi -n \
-    && php artisan route:cache --no-ansi -n
+    && chmod 777 ./bootstrap/cache
 
 EXPOSE 8080
 HEALTHCHECK CMD curl -f http://127.0.0.1:8080
 
+USER root

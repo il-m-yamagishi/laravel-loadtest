@@ -16,7 +16,7 @@ ENV TZ ${TZ}
 
 COPY --from=ext_installer /usr/bin/install-php-extensions /usr/bin/install-php-extensions
 
-RUN install-php-extensions @composer-${COMPOSER_VERSION} gettext opcache pdo_mysql redis zip sockets
+RUN install-php-extensions @composer-${COMPOSER_VERSION} gettext opcache pdo_mysql pcntl redis zip sockets
 
 COPY php.ini /usr/local/etc/php/php.ini
 
@@ -34,9 +34,7 @@ COPY --chown=www-data:www-data . /var/www/laravel-load/
 
 RUN composer install --no-dev --no-interaction --no-progress \
     && find ./storage -type d | xargs chmod 777 \
-    && chmod 777 ./bootstrap/cache \
-    && php artisan config:cache --no-ansi -n \
-    && php artisan route:cache --no-ansi -n
+    && chmod 777 ./bootstrap/cache
 
 EXPOSE 9000
 USER root

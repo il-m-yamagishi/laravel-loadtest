@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get ('/',         \App\Http\Controllers\IndexController::class);
 Route::post('/register', \App\Http\Controllers\User\RegisterController::class);
-Route::post('/login',    \App\Http\Controllers\User\LoginController::class);
+Route::post('/login',    \App\Http\Controllers\User\LoginController::class)->name('login');
 
 Route::group([
     'middleware' => 'auth',

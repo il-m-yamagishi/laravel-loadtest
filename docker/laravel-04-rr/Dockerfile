@@ -21,7 +21,7 @@ ENV TZ ${TZ}
 COPY --from=rr /usr/bin/rr /usr/bin/
 COPY --from=ext_installer /usr/bin/install-php-extensions /usr/bin/install-php-extensions
 
-RUN install-php-extensions @composer-${COMPOSER_VERSION} gettext opcache pdo_mysql redis zip sockets
+RUN install-php-extensions @composer-${COMPOSER_VERSION} gettext opcache pdo_mysql pcntl redis zip sockets
 
 COPY php.ini /usr/local/etc/php/php.ini
 
@@ -39,10 +39,8 @@ COPY --chown=www-data:www-data . /var/www/laravel-load/
 
 RUN composer install --no-dev --no-interaction --no-progress \
     && find ./storage -type d | xargs chmod 777 \
-    && chmod 777 ./bootstrap/cache \
-    && php artisan config:cache --no-ansi -n \
-    && php artisan route:cache --no-ansi -n
+    && chmod 777 ./bootstrap/cache
 
 USER root
-CMD [ "php", "artisan", "octane:start", "--rr-config=.rr.yaml", "--server=roadrunner", "--host=0.0.0.0", "--port=80", "--rpc-port=6001" ]
-EXPOSE 80 6001
+CMD [ "php", "artisan", "octane:start", "--rr-config=.rr.yaml", "--server=roadrunner", "--host=0.0.0.0", "--port=8000", "--rpc-port=6001" ]
+EXPOSE 8000 6001

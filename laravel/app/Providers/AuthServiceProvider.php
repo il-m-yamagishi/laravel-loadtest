@@ -38,7 +38,7 @@ class AuthServiceProvider extends ServiceProvider
 
         Auth::viaRequest(
             'custom-token',
-            function (Request $request): Authenticatable {
+            function (Request $request): ?Authenticatable {
                 $token = $request->bearerToken();
                 if (!$token) {
                     return null;
