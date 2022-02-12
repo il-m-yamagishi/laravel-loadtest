@@ -66,7 +66,7 @@ Docker Compose version v2.2.3
 
 - Apache, nginx unit and RoadRunner is stable(has no failure).
     - php-fpm has failure requests.
-- RoadRunner(about 500 rps) runs twice as fast as Apache(about 250 rps).
+- RoadRunner(about 400 rps) runs twice as fast as Apache(about 200 rps).
 - nginx unit increased response time linearly for certain number of requests.
 
 ### Apache + mod_php
